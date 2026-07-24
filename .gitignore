@@ -6,3 +6,10 @@ __pycache__/
 /report.html
 /review.yaml
 /*.cache.json
+.claude/
+/PLAN.md
+/CONTEXT.md
+/STATE.md
+/PROGRESS.md
+/commit.html
+CLAUDE.md
