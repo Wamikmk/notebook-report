@@ -5,8 +5,14 @@
   <title>Notebook Report</title>
 </head>
 <body>
-{% for cell in cells %}
+{% for title, cells in sections %}
+<section class="label-group" data-label="{{ title }}">
+  <h2>{{ title }}</h2>
+  {% for cell in cells %}
   <section class="cell" data-cell-id="{{ cell.id }}" data-cell-type="{{ cell.cell_type }}">
+    {% if cell.proposed_label %}
+    <span class="label">{{ cell.proposed_label }}</span>
+    {% endif %}
     <pre class="source">{{ cell.source }}</pre>
     {% set output = cell.outputs | output_text %}
     {% if output %}
@@ -16,6 +22,8 @@
     <div class="gap-box" data-cell-id="{{ cell.id }}">Gap: {{ cell.reason }}</div>
     {% endif %}
   </section>
+  {% endfor %}
+</section>
 {% endfor %}
 </body>
 </html>

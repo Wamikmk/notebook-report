@@ -9,6 +9,7 @@ from notebook_report.render import _output_text
 MODEL = "claude-haiku-4-5-20251001"
 TOOL_NAME = "classify_cell"
 LABELS = ("SETUP", "EXPLORATION", "RESULT", "ABANDONED")
+ALL_LABELS = LABELS + ("UNCLASSIFIED",)
 MAX_ATTEMPTS = 2
 
 CLASSIFY_TOOL = {

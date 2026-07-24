@@ -6,6 +6,23 @@ from notebook_report.parser import Cell
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
+SECTION_ORDER = ("SETUP", "EXPLORATION", "RESULT", "ABANDONED", "UNCLASSIFIED")
+SECTION_TITLES = {
+    "SETUP": "Setup",
+    "EXPLORATION": "Exploration",
+    "RESULT": "Result",
+    "ABANDONED": "Abandoned",
+    "UNCLASSIFIED": "Unclassified",
+}
+
+
+def _group_cells(cells: list[Cell]) -> list[tuple[str, list[Cell]]]:
+    buckets: dict[str, list[Cell]] = {key: [] for key in SECTION_ORDER}
+    for cell in cells:
+        label = cell.proposed_label if cell.proposed_label in buckets else "UNCLASSIFIED"
+        buckets[label].append(cell)
+    return [(SECTION_TITLES[key], buckets[key]) for key in SECTION_ORDER if buckets[key]]
+
 
 def _output_text(outputs: list) -> str:
     parts = []
@@ -35,4 +52,4 @@ def render_report(cells: list[Cell]) -> str:
     )
     env.filters["output_text"] = _output_text
     template = env.get_template("report.html.jinja")
-    return template.render(cells=cells)
+    return template.render(sections=_group_cells(cells))
