@@ -11,6 +11,10 @@ class Cell:
     cell_type: str
     outputs: list[Any] = field(default_factory=list)
     execution_count: int | None = None
+    stale: bool = False
+    reason: str | None = None
+    proposed_label: str | None = None
+    proposed_gloss: str | None = None
 
 
 def parse_notebook(path: str) -> list[Cell]:

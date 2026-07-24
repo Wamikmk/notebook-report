@@ -12,6 +12,9 @@
     {% if output %}
     <pre class="output">{{ output }}</pre>
     {% endif %}
+    {% if cell.stale %}
+    <div class="gap-box" data-cell-id="{{ cell.id }}">Gap: {{ cell.reason }}</div>
+    {% endif %}
   </section>
 {% endfor %}
 </body>

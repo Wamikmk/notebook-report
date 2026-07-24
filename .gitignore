@@ -5,3 +5,4 @@ __pycache__/
 .pytest_cache/
 /report.html
 /review.yaml
+/*.cache.json
