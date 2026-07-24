@@ -1,0 +1,26 @@
+[project]
+name = "notebook-report"
+version = "0.1.0"
+description = "Converts a messy Jupyter notebook into a locked, human-reviewed stakeholder report."
+requires-python = ">=3.11"
+dependencies = [
+    "nbformat",
+    "anthropic",
+    "pydantic",
+    "click",
+    "jinja2",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+notebook-report = "notebook_report.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["notebook_report*"]

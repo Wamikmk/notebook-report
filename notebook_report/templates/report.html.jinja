@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Notebook Report</title>
+</head>
+<body>
+{% for cell in cells %}
+  <section class="cell" data-cell-id="{{ cell.id }}" data-cell-type="{{ cell.cell_type }}">
+    <pre class="source">{{ cell.source }}</pre>
+    {% set output = cell.outputs | output_text %}
+    {% if output %}
+    <pre class="output">{{ output }}</pre>
+    {% endif %}
+  </section>
+{% endfor %}
+</body>
+</html>

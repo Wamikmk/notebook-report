@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Five checks before you commit</title>
+<style>
+  /* ============================================================
+     TYPESETTER DESIGN SYSTEM — do not restyle, only fill content.
+     Palette: warm paper, dark ink, blueprint teal, workshop amber.
+     Type: serif body (reading), monospace utility (labels/code).
+     ============================================================ */
+  :root {
+    --paper: #F6F4EF;
+    --panel: #FFFFFF;
+    --ink: #1B2A30;
+    --ink-soft: #45585F;
+    --line: #DCD8CF;
+    --blueprint: #2C5D69;
+    --blueprint-deep: #1E4650;
+    --amber: #C6852E;
+    --accent-a: #B5562E;   /* rust   — first parallel thing  */
+    --accent-b: #2C5D69;   /* teal   — second parallel thing */
+    --accent-c: #6A6438;   /* olive  — third parallel thing  */
+    --code-bg: #1B2A30;
+    --code-ink: #D9E4E2;
+    --shadow: 0 1px 2px rgba(27,42,48,.06), 0 8px 28px rgba(27,42,48,.07);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at 12% -5%, rgba(44,93,105,.06), transparent 42%),
+      radial-gradient(circle at 98% 8%, rgba(198,133,46,.05), transparent 40%),
+      var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 28px; }
+
+  .mono {
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  }
+
+  /* ---------- Masthead ---------- */
+  header.mast { padding: 74px 0 40px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--blueprint); margin: 0 0 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--blueprint); display: inline-block; }
+  h1 {
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.08; letter-spacing: -.012em;
+    margin: 0 0 22px; font-weight: 600;
+  }
+  h1 em { font-style: italic; color: var(--accent-a); }
+  .standfirst { font-size: 20px; color: var(--ink-soft); margin: 0; max-width: 60ch; }
+
+  /* ---------- Thesis panel (exactly one per document) ---------- */
+  .thesis {
+    margin: 44px 0; padding: 30px 32px;
+    background: var(--blueprint-deep); color: #EAF1F0;
+    border-radius: 14px; box-shadow: var(--shadow);
+  }
+  .thesis .label {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: #9CC2C0; margin: 0 0 12px;
+  }
+  .thesis p { margin: 0; font-size: 21px; line-height: 1.5; }
+  .thesis b { color: #F1C88A; font-weight: 600; }
+
+  /* ---------- Section rhythm ---------- */
+  section { padding: 46px 0; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 27px; letter-spacing: -.01em; margin: 0 0 8px; font-weight: 600; }
+  .kicker {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--amber); margin: 0 0 18px;
+  }
+  p { margin: 0 0 18px; }
+  p:last-child { margin-bottom: 0; }
+  .lead-in { color: var(--ink-soft); }
+  strong { font-weight: 600; }
+
+  /* ---------- Analogy pull (italic, amber spine) ---------- */
+  .analogy {
+    border-left: 3px solid var(--amber);
+    padding: 4px 0 4px 20px; margin: 22px 0;
+    color: var(--ink-soft); font-style: italic;
+  }
+
+  /* ---------- Cards: 2-4 parallel things, each with a color spine ---------- */
+  .cards { display: grid; gap: 18px; margin-top: 8px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 26px 28px;
+    box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .card.a::before { background: var(--accent-a); }
+  .card.b::before { background: var(--accent-b); }
+  .card.c::before { background: var(--accent-c); }
+
+  .card-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+  .card-chip {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 15px; font-weight: 600;
+    padding: 3px 10px; border-radius: 7px;
+    background: #EFEAE0; color: var(--ink);
+  }
+  .card.a .card-chip { background: #F6E2D8; color: #8A3E1F; }
+  .card.b .card-chip { background: #DBE8E9; color: #1E4650; }
+  .card.c .card-chip { background: #E8E7D3; color: #4E4A26; }
+  .card-name { font-size: 19px; font-weight: 600; }
+  .card-role {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-soft); margin-left: auto;
+  }
+  .card p { font-size: 16.5px; margin: 12px 0 0; }
+  .card .job { margin-top: 14px; font-size: 15px; color: var(--ink-soft); }
+  .card .job b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Numbered flow (true sequences only) ---------- */
+  .flow { counter-reset: step; margin-top: 12px; }
+  .step {
+    display: grid; grid-template-columns: 52px 1fr; gap: 22px;
+    padding: 22px 0; border-top: 1px solid var(--line);
+  }
+  .step:first-child { border-top: none; }
+  .step .num {
+    counter-increment: step;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 15px; font-weight: 600; color: var(--blueprint);
+  }
+  .step .num::before { content: counter(step, decimal-leading-zero); }
+  .step h3 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+  .step p { margin: 0; font-size: 16px; color: var(--ink-soft); }
+  .step .who {
+    display: inline-block;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--blueprint); margin-top: 8px;
+  }
+
+  /* ---------- Code / verbatim snippet ---------- */
+  .snippet {
+    background: var(--code-bg); color: var(--code-ink);
+    border-radius: 12px; padding: 20px 22px;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 13.5px; line-height: 1.7;
+    overflow-x: auto; margin: 22px 0; box-shadow: var(--shadow);
+  }
+  .snippet .c { color: #7FA6A2; }  /* comment */
+  .snippet .k { color: #F1C88A; }  /* key/label */
+
+  /* ---------- Name + description rows ---------- */
+  .rows { margin-top: 10px; }
+  .row {
+    display: grid; grid-template-columns: 190px 1fr; gap: 18px;
+    padding: 14px 0; border-top: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .row:first-child { border-top: none; }
+  .row-name {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 14px; font-weight: 600; color: var(--blueprint-deep);
+  }
+  .row-desc { font-size: 15.5px; color: var(--ink-soft); }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* ---------- Callout (max one per section) ---------- */
+  .callout {
+    background: #FBF7EE; border: 1px solid #ECDFC4;
+    border-radius: 12px; padding: 22px 24px; margin: 26px 0 0;
+  }
+  .callout .tag {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent-a); margin: 0 0 8px;
+  }
+  .callout p { margin: 0; font-size: 16px; }
+
+  /* ---------- Footer close ---------- */
+  footer { padding: 50px 0 80px; text-align: center; color: var(--ink-soft); }
+  footer .mark {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--blueprint);
+  }
+  footer p { margin: 14px 0 0; font-size: 16px; }
+
+  /* ---------- Motion (respects reduced-motion) ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    section, header.mast > *, .thesis { animation: rise .6s ease both; }
+    section:nth-child(2){animation-delay:.04s}
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">Manual runbook · Module 0 + M1 + M2</p>
+    <h1>Five checks before you <em>commit</em>.</h1>
+    <p class="standfirst">Claude Code wrote the bootstrap, the notebook parser, and the bare HTML renderer. It never runs git commit itself. This is the exact sequence you run by hand to land the change.</p>
+  </header>
+
+  <div class="thesis">
+    <p class="label">The whole idea in one line</p>
+    <p>Claude Code prepared the change and stopped there. <b>Only your own hands ever run git commit</b>, so nothing enters history until a human has looked at the diff.</p>
+  </div>
+
+  <section>
+    <p class="kicker">Ground rule</p>
+    <h2>Why you're doing this by hand</h2>
+    <p class="lead-in">CLAUDE.md is explicit: <strong>Claude Code never commits or pushes in this project.</strong></p>
+    <p>Every step below exists to catch a mistake before it becomes permanent: an untracked file that should have been reviewed, a leaked secret, a test that quietly broke. Run them in order. Each one depends on the one before it.</p>
+  </section>
+
+  <section>
+    <p class="kicker">The sequence</p>
+    <h2>Five steps, in order</h2>
+    <p class="lead-in">Skipping ahead defeats the point: <strong>each check exists to catch what the previous one couldn't.</strong></p>
+
+    <div class="flow">
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Review what's changing</h3>
+          <p>Look at the staged diff before anything is locked in.</p>
+          <div class="snippet">
+git status --short<br>
+git diff --cached --stat
+          </div>
+          <p>Expected staged (<span class="mono">A</span>/<span class="mono">M</span>): <span class="mono">.gitignore</span>, <span class="mono">.env.example</span>, <span class="mono">commit.md</span>, <span class="mono">pyproject.toml</span>, <span class="mono">requirements.txt</span>, <span class="mono">notebook_report/</span> (all files), <span class="mono">tests/</span> (all files), <span class="mono">PROGRESS.md</span>, <span class="mono">STATE.md</span>.</p>
+          <div class="callout">
+            <p class="tag">Stop if you see this</p>
+            <p><span class="mono">.env</span> should not appear anywhere in the output — it's gitignored. If it does, stop and fix <span class="mono">.gitignore</span> before committing anything.</p>
+          </div>
+          <span class="who">You, before anything else</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Confirm everything is already staged</h3>
+          <p>Every line of status should read cleanly as staged, not floating.</p>
+          <div class="snippet">
+git status --short
+          </div>
+          <p>Every line should read <span class="mono">A</span> or <span class="mono">M</span>. If anything shows <span class="mono">??</span> (untracked), stage it explicitly:</p>
+          <div class="snippet">
+git add &lt;path&gt;
+          </div>
+          <p>Avoid <span class="mono">git add -A</span> / <span class="mono">git add .</span> — staging explicitly is what keeps <span class="mono">.env</span> out even if <span class="mono">.gitignore</span> has a typo.</p>
+          <span class="who">You, one file at a time</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Run the tests one more time</h3>
+          <p>The last chance to catch a regression before it's on record.</p>
+          <div class="snippet">
+.venv/bin/python -m pytest -q
+          </div>
+          <p>Expect: <span class="mono">3 passed</span>.</p>
+          <span class="who">The test suite</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Commit</h3>
+          <p>One commit, three modules, a message that says what actually shipped.</p>
+          <div class="snippet">
+<pre class="mono" style="margin:0; white-space:pre-wrap;">git commit -m "Module 0 + M1 + M2: bootstrap, notebook parser, bare HTML renderer
+
+Module 0 (Bootstrap):
+- notebook_report/ package tree with stub modules per PLAN.md
+- venv on Python 3.11.11 (via uv), deps installed, requirements.txt frozen
+- pytest passing, notebook-report CLI entrypoint runs
+- live Anthropic API smoke call confirms key auth (account needs credits)
+
+Module: Notebook Parser (M1):
+- notebook_report/parser.py: Cell dataclass + parse_notebook(path), reads
+  via nbformat, strips empty/whitespace-only cells, orders executed cells
+  by execution_count (unexecuted cells trail in original order)
+- tests/test_parser.py + tests/fixtures/out_of_order.ipynb: acceptance
+  test against a fixture with out-of-order execution_counts and one
+  whitespace-only cell
+
+Module: Report Renderer bare (M2):
+- notebook_report/render.py + templates/report.html.jinja: renders an
+  ordered Cell list to HTML, one section per cell with source and (if
+  present) extracted output text
+- cli.py: render command now works end-to-end (parses, renders, writes
+  report.html); analyze remains a stub
+- tests/test_render.py: asserts source/output appear in correct
+  execution order for every non-empty cell"</pre>
+          </div>
+          <span class="who">You, and only you</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num"></div>
+        <div>
+          <h3>Verify</h3>
+          <p>Confirm the commit landed and nothing was left behind.</p>
+          <div class="snippet">
+git log -1 --oneline<br>
+git status --short
+          </div>
+          <p><span class="mono">git status --short</span> should now be empty (or show only files you intentionally left uncommitted).</p>
+          <span class="who">You, closing the loop</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">After it lands</p>
+    <h2>What comes next</h2>
+    <p class="lead-in">The plan moves in <strong>one module at a time.</strong></p>
+    <div class="callout">
+      <p class="tag">Do not start early</p>
+      <p>Module: Stale-Hash Cache (M3) waits until this commit is on the branch. Landing it first would mean building on top of a diff nobody has verified yet.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="mark">Ship it by hand</p>
+    <p>Five short checks stand between a working tree and a commit history you can trust.</p>
+  </footer>
+
+</div>
+</body>
+</html>
